@@ -1,0 +1,148 @@
+<!doctype html>
+<html>
+<head>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script type="text/javascript">
+  var spData = null;
+  function doData(json) {
+      spData = json.feed.entry;
+  }
+  
+  function drawCell(tr, val, isHeader) {
+      var td = $(isHeader ? "<th/>" : "<td/>");
+      tr.append(td);
+      td.append(val);
+      return td;
+  }
+  function drawRow(table, rowData, isHeader) {
+	  if (rowData == null) return null;
+	  if (rowData.length == 0) return null;
+	  var tr = $("<tr/>");
+	  if (isHeader) {
+		  tr.addClass("head");
+	  } else {
+		  tr.addClass("data");
+	  }
+	  table.append(tr);
+	  for(var c=0; c<rowData.length; c++) {
+		  var td = drawCell(tr, rowData[c], ((c == 0) || isHeader));
+		  td.addClass("col" + (c+1));
+	  }
+	  return tr;
+  }
+  
+  function drawTable(parent) {
+	  var table = $("<table/>");
+	  parent.append(table);
+	  return table;
+  }
+  
+  function readData(parent) {
+      var data = spData;
+      var table = drawTable(parent);
+      var rowData = [];
+      var row = 0;
+      
+      for(var r=0; r<data.length; r++) {
+          var cell = data[r]["gs$cell"];
+          var val = cell["$t"];
+          if (cell.col == 1) {
+              drawRow(table, rowData, (row == 1));
+              rowData = [];
+              row++;
+          }
+          rowData.push(val);
+      }
+      drawRow(table, rowData, (row == 1));
+  }
+  $(document).ready(function(){
+      var params = getSearchParameters();
+      readData($("#data"));
+      makeFilter($("#form"));
+      $("#col1").val(params.col1);  
+      $("#col2").val(params.col2);  
+      $("#col3").val(params.col3);  
+      $("#col4").val(params.col4);
+      $("select.filters").change(fApplyFilters);
+      fApplyFilters();
+  });
+  
+  var fApplyFilters = function applyFilters() {
+      $("tr.data").show();
+      $("select.filters").each(function(){
+          var f = $(this).attr("id");
+          var v = $(this).val();
+          if (v != "") {
+              $("tr.data").not(":has(."+f+":contains("+v+"))").hide();
+          }
+      });	  
+  }
+  
+  function makeFilter(parent) {
+      $("tr.head td,tr.head th").each(function(i){
+          var id = "col"+(i+1);
+          var slabel = $("tr.head").find("."+id).text();
+          var label = $("<label>"+slabel+"</label>");
+          label.attr("for",id);
+          parent.append(label);
+          var select = $("<select>");
+          select.attr("id",id);
+          select.attr("name",id);
+          select.addClass("filters");
+          parent.append(select);
+          var opt = $("<option/>");
+          select.append(opt);
+          $("tr.data").find("."+id).each(function(){
+             var val = $(this).text();
+             if (select.find("option[value="+val+"]").length == 0) {
+                 opt = $("<option/>");
+                 opt.attr("value",val);
+                 opt.append(val);
+                 select.append(opt);
+             }
+          });
+          
+          select.append(opt);         
+      });
+      var sub = $("<input>");
+      sub.attr("type","submit");
+      parent.append(sub);
+  }
+
+  /*
+   * http://stackoverflow.com/questions/5448545/how-to-retrieve-get-parameters-from-javascript
+   */
+  function getSearchParameters() {
+      var prmstr = window.location.search.substr(1);
+      return prmstr != null && prmstr != "" ? transformToAssocArray(prmstr) : {col1: "", col2: "", col3: "", col4: ""};
+  }
+
+  function transformToAssocArray( prmstr ) {
+    var params = {};
+    var prmarr = prmstr.split("&");
+    for ( var i = 0; i < prmarr.length; i++) {
+        var tmparr = prmarr[i].split("=");
+        params[tmparr[0]] = tmparr[1];
+    }
+    return params;
+  }
+  </script>   
+<script src="https://spreadsheets.google.com/feeds/cells/1hbHqrnYa4oMUquZcq8WkTJk0kI0t9scGBwro-EH-ALA/1/public/values?alt=json-in-script&callback=doData"></script>
+<style type="text/css">
+  table {border-collapse: collapse; width: 100%;}
+  th, td {border: thin solid black; padding: 3px; text-align: left}
+  tr.head th, tr.head td {background-color: #EDEDED; border-bottom: 4px double black;}
+  h1 {text-align: center;}
+  body {margin: 12px; font-size: 12px;}
+</style>
+<style type="text/css" media="print">
+  form {display: none;}
+</style>
+</head>
+<body>
+<h1>Parse Google Spreadsheet with JavaScript and Filters</h1> 
+<form id="form" action="GoogleSpreadsheetFilter.html" method="GET">
+</form>
+<div id="data"/>
+</body>
+</html> 
