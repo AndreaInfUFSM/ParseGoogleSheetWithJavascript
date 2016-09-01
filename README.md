@@ -52,3 +52,9 @@ Example: https://rawgit.com/Georgetown-University-Libraries/ParseGoogleSheetWith
 Code: https://github.com/Georgetown-University-Libraries/ParseGoogleSheetWithJavascript/blob/master/samples/GoogleSpreadsheetFilter.html
 
 JsFiddle: http://jsfiddle.net/terrywbrady/op8g6drb/
+
+
+***
+[![Georgetown University Library IT Code Repositories](https://raw.githubusercontent.com/Georgetown-University-Libraries/georgetown-university-libraries.github.io/master/LIT-logo-small.png)Georgetown University Library IT Code Repositories](http://georgetown-university-libraries.github.io/)
+
+
